@@ -19,10 +19,13 @@ namespace MineSweeper
             // get # of mines
             var numberOfMines = SmartRead("Enter the number of mines:");
             // create board
-            Gridling[][] board = new Gridling[boardX][];
-            for(int i = 0; i < boardX; i++)
+            Gridling[,] board = new Gridling[boardY,boardX];
+            for(int i = 0; i < boardY; i ++)
             {
-                board[i] = new Gridling[boardY];
+                for(int j = 0; j < boardX; j++)
+                {
+                    board[i, j] = new Gridling(j,i);
+                }
             }
 
             // place mines
@@ -33,100 +36,175 @@ namespace MineSweeper
                 // draw/update board
                 DrawBoard(ref board);
 
-                // get moves ( reveal or flag )
-                Console.ReadLine();
+                // get moves ( quit, reveal,  or un/flag )
+                var input = GetMove();
                 // end in victory or defeat
+                if (input == "q")
+                {
+                    Console.WriteLine("Quitter.");
+                    alive = false;
+                }
+                if(input == "r")
+                {
+                    Gridling spot = GetCoordinates(ref board);
+                    if(spot.Bomb && !spot.Flagged)
+                    {
+                        Console.WriteLine("Dead.");
+                        alive = false;
+                    }
+
+                    if (spot.Flagged)
+                    {
+                        Console.WriteLine("Cannot reveal a flagged spot.");
+                    }
+                    else
+                    {
+                        board[spot.Y,spot.X].Revealed = true;
+                    }
+                }
+                if(input == "u")
+                {
+                    Gridling spot = GetCoordinates(ref board);
+                    if (spot.Flagged)
+                    {
+                        board[spot.Y, spot.X].Flagged = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Not a flagged spot.");
+                    }
+                }
+                if(input == "f")
+                {
+                    Gridling spot = GetCoordinates(ref board);
+                    if (spot.Flagged)
+                    {
+                        Console.WriteLine("Not a flagged spot.");
+                        
+                    }
+                    else
+                    {
+                        board[spot.Y, spot.X].Flagged = true;
+                    }
+                }
             }
-            
+
+            Console.WriteLine("Thanks for playing.");
+            Console.ReadLine();
         }
 
-        private static void DrawBoard(ref Gridling[][] board)
+        private static Gridling GetCoordinates(ref Gridling[,] board)
         {
-            var maxX = board.GetLength(0);
-            var maxY = board.GetLength(1);
-            Console.Clear();
+            int x,y;
+            bool success;
+
+            Console.Write("Enter X coordinate:");
+            success = Int32.TryParse(Console.ReadLine(), out x);
+            if (!success) return GetCoordinates(ref board);
+
+            Console.Write("Enter Y coordinate:");
+            success = Int32.TryParse(Console.ReadLine(), out y);
+            if (!success) return GetCoordinates(ref board);
+
+            return board[y, x];
+        }
+
+
+        private static string GetMove()
+        {
+            Console.Write("You can (q)uit, (f)lag or (u)nflag a space, or (r)eveal a space: ");
+            var result = Console.ReadLine();
+            if (result == "q" || result == "f" || result == "u" || result == "r") return result;
+            return GetMove();
+        }
+
+        private static void DrawBoard(ref Gridling[,] board)
+        {
+            var maxY = board.GetLength(0)-1;
+            var maxX = board.GetLength(1);
+            //Console.Clear();
             for(int y = maxY; y > -1; y--)
             {
                 Console.Write(y);
                 Console.Write("|");
-                for(int x = 0; x < maxX + 1; x++)
+                for(int x = 0; x < maxX; x++)
                 {
-                    Console.Write(board[x][y].Marker);
+                    Console.Write(board[y, x].Marker);
                 }
                 Console.Write("\r\n");
             }
         }
 
-        private static void PlaceMines(ref Gridling[][] board, int numberOfMines)
+        private static void PlaceMines(ref Gridling[,] board, int numberOfMines)
         {
             Random rnd = new Random();
-            var maxX = board.GetLength(0);
-            var maxY = board[0].GetLength(0);
+            var maxY = board.GetLength(0);
+            var maxX = board.GetLength(1);
 
             while (numberOfMines > 0)
             {
                 var localX = rnd.Next(0, maxX);
                 var localY = rnd.Next(0, maxY);
-                if (!board[localX][localY].Bomb)
+                if (!board[localY,localX].Bomb)
                 {
-                    board[localX][ localY].Bomb = true;
-                    AlertNeighbors(ref board, localX, localY);
+                    board[localX, localY].Bomb = true;
+                    AlertNeighbors(ref board, localY, localX);
                     numberOfMines--;
                 }
             }
         }
 
-        private static void AlertNeighbors(ref Gridling[][] board, int localX, int localY)
+        private static void AlertNeighbors(ref Gridling[,] board, int localY, int localX)
         {
-            var maxX = board[0].GetLength(0)-1;
-            var maxY = board.GetLength(1)-1;
+            var maxY = board.GetLength(0)-1;
+            var maxX = board.GetLength(1)-1;
             
             //bottom left; x-1 y-1
             if (localX - 1 > 0 && localY - 1 > 0 )
             {
-                board[localX - 1][localY - 1].DangerousNeighbors++;
+                board[localY - 1, localX - 1].DangerousNeighbors++;
             }
 
             //left; x-1 y
             if (localX - 1 > 0)
             {
-                board[localX - 1][localY].DangerousNeighbors++;
+                board[localY, localX - 1].DangerousNeighbors++;
             }
 
             //upper left; x-1 y+1
-            if (localX - 1 < 0 && localY + 1 < maxY )
+            if (localX - 1 > 0 && localY + 1 < maxY )
             {
-                board[localX - 1][localY + 1].DangerousNeighbors++;
+                board[localY + 1, localX - 1].DangerousNeighbors++;
             }
 
             //top; y+1
             if (localY + 1 < maxY)
             {
-                board[localX][localY + 1].DangerousNeighbors++;
+                board[localY + 1,localX].DangerousNeighbors++;
             }
 
             //upper right; x+1 y+1
             if (localX + 1 < maxX && localY + 1 < maxY)
             {
-                board[localX + 1][localY + 1].DangerousNeighbors++;
+                board[localY + 1, localX + 1].DangerousNeighbors++;
             }
 
             //right; x+1
             if(localX + 1 < maxX)
             {
-                board[localX + 1][localY].DangerousNeighbors++;
+                board[localY, localX + 1].DangerousNeighbors++;
             }
 
             //lower right; x+1 y-1
             if(localX + 1 < maxX && localY - 1 > 0)
             {
-                board[localX + 1][localY - 1].DangerousNeighbors++;
+                board[localY - 1, localX + 1].DangerousNeighbors++;
             }
 
             //bottom; y-1
             if(localY - 1 > 0)
             {
-                board[localX][localY - 1].DangerousNeighbors++;
+                board[localY - 1,localX].DangerousNeighbors++;
             }
         }
 
@@ -156,6 +234,8 @@ namespace MineSweeper
 
     public class Gridling
     {
+        public int X { get; set; }
+        public int Y { get; set; }
         public bool Flagged { get; set; }
         public bool Revealed { get; set; }
         public bool Bomb { get; set; }
@@ -163,12 +243,14 @@ namespace MineSweeper
         public char Marker { get
             {
                 if (this.Flagged) return 'F';
-                if (this.Revealed) return (char)this.DangerousNeighbors;
+                if (this.Revealed) return Convert.ToChar(this.DangerousNeighbors.ToString());
                 return '■';
             } }
 
-        public Gridling()
+        public Gridling(int x, int y)
         {
+            X = x;
+            Y = y;
             Flagged = false;
             Revealed = false;
             Bomb = false;
