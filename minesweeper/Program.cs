@@ -60,6 +60,14 @@ namespace MineSweeper
                     else
                     {
                         board[spot.Y,spot.X].Revealed = true;
+                        if (spot.DangerousNeighbors == 0)
+                        {
+                            var neighbors = FindMyNeighbors(ref board, spot);
+                            foreach(var neighbor in neighbors)
+                            {
+                                board[neighbor.Y, neighbor.X].Revealed = true;
+                            }
+                        }
                     }
                 }
                 if(input == "u")
@@ -147,64 +155,80 @@ namespace MineSweeper
                 var localY = rnd.Next(0, maxY);
                 if (!board[localY,localX].Bomb)
                 {
-                    board[localX, localY].Bomb = true;
-                    AlertNeighbors(ref board, localY, localX);
+                    Console.WriteLine("Planting bomb at {0},{1}", localX, localY);
+                    board[localY, localX].Bomb = true;
+                    AlertNeighbors(ref board, board[localY, localX]);
                     numberOfMines--;
                 }
             }
         }
 
-        private static void AlertNeighbors(ref Gridling[,] board, int localY, int localX)
+        private static List<Gridling> FindMyNeighbors(ref Gridling[,] board, Gridling spot)
         {
-            var maxY = board.GetLength(0)-1;
-            var maxX = board.GetLength(1)-1;
-            
-            //bottom left; x-1 y-1
-            if (localX - 1 > 0 && localY - 1 > 0 )
+            var results = new List<Gridling>();
+            var localX = spot.X;
+            var localY = spot.Y;
+            var maxY = board.GetLength(0) - 1;
+            var maxX = board.GetLength(1) - 1;
+
+            if (localX - 1 > 0 && localY - 1 > 0)
             {
-                board[localY - 1, localX - 1].DangerousNeighbors++;
+                results.Add(board[localY - 1, localX - 1]);
             }
 
             //left; x-1 y
             if (localX - 1 > 0)
             {
-                board[localY, localX - 1].DangerousNeighbors++;
+                results.Add(board[localY, localX - 1]);
             }
 
             //upper left; x-1 y+1
-            if (localX - 1 > 0 && localY + 1 < maxY )
+            if (localX - 1 > 0 && localY + 1 < maxY)
             {
-                board[localY + 1, localX - 1].DangerousNeighbors++;
+                results.Add(board[localY + 1, localX - 1]);
             }
 
             //top; y+1
             if (localY + 1 < maxY)
             {
-                board[localY + 1,localX].DangerousNeighbors++;
+                results.Add(board[localY + 1, localX]);
             }
 
             //upper right; x+1 y+1
             if (localX + 1 < maxX && localY + 1 < maxY)
             {
-                board[localY + 1, localX + 1].DangerousNeighbors++;
+                results.Add(board[localY + 1, localX + 1]);
             }
 
             //right; x+1
-            if(localX + 1 < maxX)
+            if (localX + 1 < maxX)
             {
-                board[localY, localX + 1].DangerousNeighbors++;
+                results.Add(board[localY, localX + 1]);
             }
 
             //lower right; x+1 y-1
-            if(localX + 1 < maxX && localY - 1 > 0)
+            if (localX + 1 < maxX && localY - 1 > 0)
             {
-                board[localY - 1, localX + 1].DangerousNeighbors++;
+                results.Add(board[localY - 1, localX + 1]);
             }
 
             //bottom; y-1
-            if(localY - 1 > 0)
+            if (localY - 1 > 0)
             {
-                board[localY - 1,localX].DangerousNeighbors++;
+                results.Add(board[localY - 1, localX]);
+            }
+
+            return results;
+        }
+
+
+
+        private static void AlertNeighbors(ref Gridling[,] board, Gridling spot)
+        {
+            var list = FindMyNeighbors(ref board, spot);
+            foreach(var gridling in list)
+            {
+                gridling.DangerousNeighbors++;
             }
         }
 
