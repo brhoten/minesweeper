@@ -87,7 +87,7 @@ namespace MineSweeper
                     Gridling spot = GetCoordinates(ref board);
                     if (spot.Flagged)
                     {
-                        Console.WriteLine("Not a flagged spot.");
+                        Console.WriteLine("Spot already flagged.");
                         
                     }
                     else
