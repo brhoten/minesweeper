@@ -12,12 +12,12 @@ namespace MineSweeper
         {
             bool alive = true;
             // get board dimensions
-            var boardX = SmartRead("Enter the X dimension of the board:");
-            var boardY = SmartRead("Enter the Y dimension of the board:");
+            var boardX = SmartRead("Enter the X dimension of the board (1-9):");
+            var boardY = SmartRead("Enter the Y dimension of the board (1-9):");
 
 
             // get # of mines
-            var numberOfMines = SmartRead("Enter the number of mines:");
+            var numberOfMines = SmartRead("Enter the number of mines (1-9):");
             // create board
             Gridling[,] board = new Gridling[boardY,boardX];
             for(int i = 0; i < boardY; i ++)
@@ -68,6 +68,7 @@ namespace MineSweeper
                                 board[neighbor.Y, neighbor.X].Revealed = true;
                             }
                         }
+                        alive = StillPlaying(ref board);
                     }
                 }
                 if(input == "u")
@@ -93,10 +94,11 @@ namespace MineSweeper
                     else
                     {
                         board[spot.Y, spot.X].Flagged = true;
+                        alive = StillPlaying(ref board);
                     }
                 }
 
-                alive = StillPlaying(ref board);
+                
             }
 
             Console.WriteLine("Thanks for playing.");
@@ -105,7 +107,7 @@ namespace MineSweeper
 
         private static bool StillPlaying(ref Gridling[,] board)
         {
-            return board.Cast<Gridling>().ToList().Any(x => x.Bomb && !x.Flagged);
+            return board.Cast<Gridling>().ToList().Any(x => !x.Bomb && !x.Revealed);
         }
 
         private static Gridling GetCoordinates(ref Gridling[,] board)
@@ -148,6 +150,11 @@ namespace MineSweeper
                 }
                 Console.Write("\r\n");
             }
+            Console.Write(" +");
+            for (int i = 0; i < maxX; i++) Console.Write("-");
+            Console.Write("\r\n  ");
+            for (int i = 0; i < maxX; i++) Console.Write(i);
+            Console.Write("\r\n");
         }
 
         private static void PlaceMines(ref Gridling[,] board, int numberOfMines)
@@ -246,16 +253,16 @@ namespace MineSweeper
             var Value = Console.ReadLine();
             if(Int32.TryParse(Value, out result))
             {
-                if(result < 1)
+                if(result < 1 || result > 9)
                 {
-                    Console.WriteLine("Value must be an integer greater than 0.");
+                    Console.WriteLine("Value must be an integer between 1 and 9.");
                     return SmartRead(message);
                 }
                 return result;
             }
             else
             {
-                Console.WriteLine("Value must be an integer greater than 0.");
+                Console.WriteLine("Value must be an integer between 1 and 9.");
                 return SmartRead(message);
             }
         }
