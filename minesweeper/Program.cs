@@ -95,10 +95,17 @@ namespace MineSweeper
                         board[spot.Y, spot.X].Flagged = true;
                     }
                 }
+
+                alive = StillPlaying(ref board);
             }
 
             Console.WriteLine("Thanks for playing.");
             Console.ReadLine();
+        }
+
+        private static bool StillPlaying(ref Gridling[,] board)
+        {
+            return board.Cast<Gridling>().ToList().Any(x => x.Bomb && !x.Flagged);
         }
 
         private static Gridling GetCoordinates(ref Gridling[,] board)
