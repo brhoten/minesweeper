@@ -170,7 +170,9 @@ namespace MineSweeper
                 var localY = rnd.Next(0, maxY);
                 if (!board[localY,localX].Bomb)
                 {
+#if DEBUG
                     Console.WriteLine("Planting bomb at {0},{1}", localX, localY);
+#endif
                     board[localY, localX].Bomb = true;
                     AlertNeighbors(ref board, board[localY, localX]);
                     numberOfMines--;
