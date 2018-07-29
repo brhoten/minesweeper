@@ -51,6 +51,7 @@ namespace MineSweeper
                     {
                         Console.WriteLine("Dead.");
                         alive = false;
+                        continue;
                     }
 
                     if (spot.Flagged)
@@ -182,22 +183,22 @@ namespace MineSweeper
             var results = new List<Gridling>();
             var localX = spot.X;
             var localY = spot.Y;
-            var maxY = board.GetLength(0) - 1;
-            var maxX = board.GetLength(1) - 1;
+            var maxY = board.GetLength(0);
+            var maxX = board.GetLength(1);
 
-            if (localX - 1 > 0 && localY - 1 > 0)
+            if (localX - 1 > -1 && localY - 1 > -1)
             {
                 results.Add(board[localY - 1, localX - 1]);
             }
 
             //left; x-1 y
-            if (localX - 1 > 0)
+            if (localX - 1 > -1)
             {
                 results.Add(board[localY, localX - 1]);
             }
 
             //upper left; x-1 y+1
-            if (localX - 1 > 0 && localY + 1 < maxY)
+            if (localX - 1 > -1 && localY + 1 < maxY)
             {
                 results.Add(board[localY + 1, localX - 1]);
             }
@@ -221,13 +222,13 @@ namespace MineSweeper
             }
 
             //lower right; x+1 y-1
-            if (localX + 1 < maxX && localY - 1 > 0)
+            if (localX + 1 < maxX && localY - 1 > -1)
             {
                 results.Add(board[localY - 1, localX + 1]);
             }
 
             //bottom; y-1
-            if (localY - 1 > 0)
+            if (localY - 1 > -1)
             {
                 results.Add(board[localY - 1, localX]);
             }
