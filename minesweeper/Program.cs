@@ -12,12 +12,12 @@ namespace MineSweeper
         {
             bool alive = true;
             // get board dimensions
-            var boardX = SmartRead("Enter the X dimension of the board (1-9):");
-            var boardY = SmartRead("Enter the Y dimension of the board (1-9):");
+            var boardX = SmartRead("\r\nEnter the X dimension of the board (1-9):");
+            var boardY = SmartRead("\r\nEnter the Y dimension of the board (1-9):");
 
 
             // get # of mines
-            var numberOfMines = SmartRead("Enter the number of mines (1-9):");
+            var numberOfMines = SmartRead("\r\nEnter the number of mines (1-9):");
             // create board
             Gridling[,] board = new Gridling[boardY,boardX];
             for(int i = 0; i < boardY; i ++)
@@ -39,67 +39,67 @@ namespace MineSweeper
                 // get moves ( quit, reveal,  or un/flag )
                 var input = GetMove();
                 // end in victory or defeat
-                if (input == "q")
+                Gridling spot = new Gridling(0,0);
+                switch (input)
                 {
-                    Console.WriteLine("Quitter.");
-                    alive = false;
-                }
-                if(input == "r")
-                {
-                    Gridling spot = GetCoordinates(ref board);
-                    if(spot.Bomb && !spot.Flagged)
-                    {
-                        Console.WriteLine("Dead.");
+                    case ConsoleKey.Q:
+                        Console.WriteLine("\r\nQuitter.");
                         alive = false;
-                        continue;
-                    }
-
-                    if (spot.Flagged)
-                    {
-                        Console.WriteLine("Cannot reveal a flagged spot.");
-                    }
-                    else
-                    {
-                        board[spot.Y,spot.X].Revealed = true;
-                        if (spot.DangerousNeighbors == 0)
+                        break;
+                    case ConsoleKey.R:
+                        spot = GetCoordinates(ref board);
+                        if (spot.Bomb && !spot.Flagged)
                         {
-                            var neighbors = FindMyNeighbors(ref board, spot);
-                            foreach(var neighbor in neighbors)
-                            {
-                                board[neighbor.Y, neighbor.X].Revealed = true;
-                            }
+                            Console.WriteLine("\r\nDead.");
+                            alive = false;
+                            continue;
                         }
-                        alive = StillPlaying(ref board);
-                    }
-                }
-                if(input == "u")
-                {
-                    Gridling spot = GetCoordinates(ref board);
-                    if (spot.Flagged)
-                    {
-                        board[spot.Y, spot.X].Flagged = false;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Not a flagged spot.");
-                    }
-                }
-                if(input == "f")
-                {
-                    Gridling spot = GetCoordinates(ref board);
-                    if (spot.Flagged)
-                    {
-                        Console.WriteLine("Spot already flagged.");
-                        
-                    }
-                    else
-                    {
-                        board[spot.Y, spot.X].Flagged = true;
-                        alive = StillPlaying(ref board);
-                    }
+
+                        if (spot.Flagged)
+                        {
+                            Console.WriteLine("\r\nCannot reveal a flagged spot.");
+                        }
+                        else
+                        {
+                            board[spot.Y, spot.X].Revealed = true;
+                            if (spot.DangerousNeighbors == 0)
+                            {
+                                var neighbors = FindMyNeighbors(ref board, spot);
+                                foreach (var neighbor in neighbors)
+                                {
+                                    board[neighbor.Y, neighbor.X].Revealed = true;
+                                }
+                            }
+                            alive = StillPlaying(ref board);
+                        }
+                        break;
+                    case ConsoleKey.U:
+                        spot = GetCoordinates(ref board);
+                        if (spot.Flagged)
+                        {
+                            board[spot.Y, spot.X].Flagged = false;
+                        }
+                        else
+                        {
+                            Console.WriteLine("\r\nNot a flagged spot.");
+                        }
+                        break;
+                    case ConsoleKey.F:
+                        spot = GetCoordinates(ref board);
+                        if (spot.Flagged)
+                        {
+                            Console.WriteLine("\r\nSpot already flagged.");
+
+                        }
+                        else
+                        {
+                            board[spot.Y, spot.X].Flagged = true;
+                            alive = StillPlaying(ref board);
+                        }
+                        break;
+                    default: continue;
                 }
 
-                
             }
 
             Console.WriteLine("Thanks for playing.");
@@ -116,23 +116,23 @@ namespace MineSweeper
             int x,y;
             bool success;
 
-            Console.Write("Enter X coordinate:");
-            success = Int32.TryParse(Console.ReadLine(), out x);
+            Console.Write("\r\nEnter X coordinate:");
+            success = Int32.TryParse(Console.ReadKey().KeyChar.ToString(), out x);
             if (!success) return GetCoordinates(ref board);
 
-            Console.Write("Enter Y coordinate:");
-            success = Int32.TryParse(Console.ReadLine(), out y);
+            Console.Write("\r\nEnter Y coordinate:");
+            success = Int32.TryParse(Console.ReadKey().KeyChar.ToString(), out y);
             if (!success) return GetCoordinates(ref board);
 
             return board[y, x];
         }
 
 
-        private static string GetMove()
+        private static ConsoleKey GetMove()
         {
             Console.Write("You can (q)uit, (f)lag or (u)nflag a space, or (r)eveal a space: ");
-            var result = Console.ReadLine();
-            if (result == "q" || result == "f" || result == "u" || result == "r") return result;
+            var result = Console.ReadKey().Key;
+            if (result == ConsoleKey.Q || result == ConsoleKey.F || result == ConsoleKey.U || result == ConsoleKey.R) return result;
             return GetMove();
         }
 
@@ -140,7 +140,7 @@ namespace MineSweeper
         {
             var maxY = board.GetLength(0)-1;
             var maxX = board.GetLength(1);
-            //Console.Clear();
+            Console.WriteLine();
             for(int y = maxY; y > -1; y--)
             {
                 Console.Write(y);
@@ -253,19 +253,19 @@ namespace MineSweeper
         {
             int result;
             Console.Write(message);
-            var Value = Console.ReadLine();
-            if(Int32.TryParse(Value, out result))
+            var Value = Console.ReadKey();
+            if(Int32.TryParse(Value.KeyChar.ToString(), out result))
             {
                 if(result < 1 || result > 9)
                 {
-                    Console.WriteLine("Value must be an integer between 1 and 9.");
+                    Console.WriteLine("\r\nValue must be an integer between 1 and 9.");
                     return SmartRead(message);
                 }
                 return result;
             }
             else
             {
-                Console.WriteLine("Value must be an integer between 1 and 9.");
+                Console.WriteLine("\r\nValue must be an integer between 1 and 9.");
                 return SmartRead(message);
             }
         }
