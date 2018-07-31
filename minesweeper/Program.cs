@@ -61,15 +61,8 @@ namespace MineSweeper
                         }
                         else
                         {
-                            board[spot.Y, spot.X].Revealed = true;
-                            if (spot.DangerousNeighbors == 0)
-                            {
-                                var neighbors = FindMyNeighbors(ref board, spot);
-                                foreach (var neighbor in neighbors)
-                                {
-                                    board[neighbor.Y, neighbor.X].Revealed = true;
-                                }
-                            }
+
+                            RevealSpot(ref board, spot);
                             alive = StillPlaying(ref board);
                         }
                         break;
@@ -102,8 +95,22 @@ namespace MineSweeper
 
             }
 
-            Console.WriteLine("Thanks for playing.");
+            DrawBoard(ref board);
+            Console.WriteLine("\r\nThanks for playing.");
             Console.ReadLine();
+        }
+
+        private static void RevealSpot(ref Gridling[,] board, Gridling spot)
+        {
+            board[spot.Y, spot.X].Revealed = true;
+            if (spot.DangerousNeighbors == 0)
+            {
+                var neighbors = FindMyNeighbors(ref board, spot);
+                foreach (var neighbor in neighbors.Where(x => !x.Revealed))
+                {
+                    RevealSpot(ref board, neighbor);
+                }
+            }
         }
 
         private static bool StillPlaying(ref Gridling[,] board)
@@ -171,7 +178,7 @@ namespace MineSweeper
                 if (!board[localY,localX].Bomb)
                 {
 #if DEBUG
-                    Console.WriteLine("Planting bomb at {0},{1}", localX, localY);
+                    Console.WriteLine("\r\nPlanting bomb at {0},{1}", localX, localY);
 #endif
                     board[localY, localX].Bomb = true;
                     AlertNeighbors(ref board, board[localY, localX]);
